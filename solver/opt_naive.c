@@ -62,3 +62,42 @@ void naive_det_(Target** t, int i, const int n)
   t[n-1] = t[i];
   t[i] = tgt;
 }
+
+// Quick hack
+void search(Target** t, const int n, Target* tgt, int field, num min, num max, num tolerance)
+{
+  while (max-min > tolerance)
+  {
+    num mid = (max + min) / 2;
+
+    switch (field)
+    {
+      case 0:
+        tgt->p = mid;
+        break;
+      case 1:
+        tgt->e = mid;
+        break;
+      default:
+        tgt->w = mid;
+    }
+
+    naive_det(t, n);
+
+    switch (field)
+    {
+      case 0:
+      case 1:
+        if (t[0] == tgt)
+          max = mid;
+        else
+          min = mid;
+        break;
+      default:
+        if (t[0] == tgt)
+          min = mid;
+        else
+          max = mid;
+    }
+  }
+}

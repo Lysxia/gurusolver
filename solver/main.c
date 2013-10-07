@@ -12,7 +12,7 @@ int main(int argc, char** argv)
 
   rand_target(tgt, BUFF_SIZE);
 
-#define T_NUM 8
+#define T_NUM 6
 
   Target *t[T_NUM];
 
@@ -34,6 +34,20 @@ int main(int argc, char** argv)
   fflush(stdout);
 
   Target tgt2[T_NUM];
+
+  for (i = 0 ; i < T_NUM ; i++)
+    tgt2[i] = *t[i];
+
+  print_targets(tgt2, T_NUM);
+
+  printf("%f\n", guru_time(t,T_NUM));
+
+  printf("Search\n");
+  fflush(stdout);
+
+  search(t, T_NUM, t[0], 2, 0, 10, 0.00000000001);
+
+  printf("Done\n");
 
   for (i = 0 ; i < T_NUM ; i++)
     tgt2[i] = *t[i];

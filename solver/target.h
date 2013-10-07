@@ -3,15 +3,15 @@
 
 #define BUFF_SIZE 16
 
-typedef float num;
+typedef double num;
 
 const num Guru;
 
 typedef struct
 {
   num p, // Conversion probability
-        e, // Efficiency
-        w; // Work
+      e, // Efficiency
+      w; // Work
 } Target;
 
 num utility(const Target, const num);

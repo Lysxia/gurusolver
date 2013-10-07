@@ -6,6 +6,7 @@ const num Guru = 1;
 
 num utility(const Target tgt, const num guru)
 {
+  //return - (tgt.e/(guru + tgt.e) + (1-tgt.e)/guru) / tgt.w;
   return tgt.p / tgt.w * (tgt.e / (guru * (guru + tgt.e)));
 }
 
@@ -36,7 +37,7 @@ void rand_target(Target* t, int n)
 #define RAND1 rand()%100/100.
     t[i].p = RAND1;
     t[i].e = RAND1;
-    t[i].w = rand()%100;
+    t[i].w = (rand()%100+1)/100.;
   }
 }
 
@@ -44,22 +45,22 @@ void print_targets(const Target* t, const int n)
 {
   int i;
   for (i = 0 ; i < n ; i++)
-    printf("%7.2f", t[i].p);
+    printf("%9.2f", t[i].p);
 
   printf("\n");
 
   for (i = 0 ; i < n ; i++)
-    printf("%7.2f", t[i].e);
+    printf("%9.2f", t[i].e);
 
   printf("\n");
 
   for (i = 0 ; i < n ; i++)
-    printf("%7.2f", t[i].w);
+    printf("%9.2f", t[i].w);
 
   printf("\n");
 
   for (i = 0 ; i < n ; i++)
-    printf("%7.2f", 1000*utility(t[i], Guru));
+    printf("%9.3f", 1000*utility(t[i], Guru));
 
   printf("\n");
 }
