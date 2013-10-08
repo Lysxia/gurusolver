@@ -1,9 +1,9 @@
 #ifndef OPT_NAIVE_H
 #define OPT_NAIVE_H
 
-// Deterministic guru
-num naive_det(Target**, const int);
+void init_buff(void);
 
-void search(Target** t, const int n, Target* tgt, int field, num min, num max, num tolerance);
+// Deterministic guru
+num naive_det(Target*, Target*, const int);
 
 #endif

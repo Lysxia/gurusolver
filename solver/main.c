@@ -7,54 +7,29 @@
 int main(int argc, char** argv)
 {
   srand(time(NULL));
+  init_buff();
 
-  Target tgt[BUFF_SIZE];
+  Target tgt[BUFF_SIZE], tgt2[BUFF_SIZE];
 
   rand_target(tgt, BUFF_SIZE);
 
-#define T_NUM 6
-
-  Target *t[T_NUM];
-
-  int i;
-
-  for (i = 0 ; i < T_NUM ; i++)
-    t[i] = &(tgt[i]);
+#define T_NUM 8
 
   print_targets(tgt, T_NUM);
 
-  printf("%f\n", guru_time(t,T_NUM));
+  printf("%f\n", guru_time(tgt,T_NUM));
 
   printf("Start\n");
   fflush(stdout);
 
-  naive_det(t, T_NUM);
+  naive_det(tgt, tgt2, T_NUM);
 
   printf("Done\n");
   fflush(stdout);
 
-  Target tgt2[T_NUM];
-
-  for (i = 0 ; i < T_NUM ; i++)
-    tgt2[i] = *t[i];
-
   print_targets(tgt2, T_NUM);
 
-  printf("%f\n", guru_time(t,T_NUM));
-
-  printf("Search\n");
-  fflush(stdout);
-
-  search(t, T_NUM, t[0], 2, 0, 10, 0.00000000001);
-
-  printf("Done\n");
-
-  for (i = 0 ; i < T_NUM ; i++)
-    tgt2[i] = *t[i];
-
-  print_targets(tgt2, T_NUM);
-
-  printf("%f\n", guru_time(t,T_NUM));
+  printf("%f\n", guru_time(tgt2,T_NUM));
 
   return 0;
 }

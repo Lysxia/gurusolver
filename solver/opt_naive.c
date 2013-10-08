@@ -2,7 +2,7 @@
 #include "target.h"
 #include "opt_naive.h"
 
-typedef struct List List;
+typedef struct TList TList;
 
 struct TList {
   int hd_id;
@@ -15,26 +15,40 @@ struct TList {
 TList tlbuff[BUFF_2SIZE];
 num probabuff[BUFF_2SIZE][BUFF_SIZE];
 num powerbuff[BUFF_2SIZE][BUFF_SIZE];
-num sumbuf[BUFF_SIZE];
+num sumbuff[BUFF_SIZE+1];
 
-void naive_det_(Target*, int*, int, int, const int);
+void naive_det_(Target*, int, int, const int);
 void update_col(Target, int);
-void reset_list(int);
+void reset_buff(int);
 
-num naive_det(Target* t, int* permu, const int n)
+int permu[BUFF_SIZE];
+
+num naive_det(Target* t, Target* u, const int n)
 {
-  naive_det_(t, permu, 0, 0, n);
+  reset_buff(1 << n);
+
+  naive_det_(t, 0, 0, n);
+
+  TList *l = &tlbuff[0];
+  int i = 0;
+
+  while (l != NULL)
+  {
+    u[i++] = t[l->hd_id];
+    l = l->tl;
+  }
 
   return tlbuff[0].hd_time;
 }
 
-void naive_det_(Target* t, int* permu, int i, int s, const int n)
+void naive_det_(Target* tgt, int i, int s, const int n)
 {
-  if (i < n)
+  if (i < n - 1)
   {
     int j;
-    int x = permu[i], id;
-    num time = 1./0;
+    int x = permu[i];
+    num min_time = 1./0.;
+    int min_x = x, min_s;
 
     for (j = i ; j < n ; j++)
     {
@@ -43,16 +57,35 @@ void naive_det_(Target* t, int* permu, int i, int s, const int n)
 
       int s_ = s | 1 << permu[i];
 
-      if (tlbuff[s_] == NULL)
-        naive_det_(t, permu, i+1, s_, n);
+      if (tlbuff[s_].hd_id == -1)
+      {
+        update_col(tgt[permu[i]], i);
+        naive_det_(tgt, i+1, s_, n);
+      }
 
-      num tgt_time = 
+      num tgt_time = tgt[permu[i]].w * sumbuff[i] + tlbuff[s_].hd_time;
+
+      if (tgt_time < min_time)
+      {
+        min_time = tgt_time;
+        min_x = permu[i];
+        min_s = s_;
+      }
 
       permu[j] = permu[i];
     }
 
-    t[n-1] = t[i];
-    t[i] = tgt;
+    permu[i] = x;
+
+    tlbuff[s].hd_id = min_x;
+    tlbuff[s].hd_time = min_time;
+    tlbuff[s].tl = &(tlbuff[min_s]);
+  }
+  else if (i == n - 1)
+  {
+    tlbuff[s].hd_id = permu[i];
+    tlbuff[s].hd_time = tgt[permu[i]].w * sumbuff[i];
+    tlbuff[s].tl = NULL;
   }
 }
 
@@ -63,39 +96,101 @@ void update_col(Target tgt, const int j)
     probabuff[0][0] = 1 - tgt.p;
     probabuff[1][0] = tgt.p;
 
-    powerbuff[0][0] = tgt.e;
+    powerbuff[0][0] = Guru + tgt.e;
+
+    sumbuff[1] = tgt.p / powerbuff[0][0] + (1 - tgt.p) / Guru;
+
     return;
   }
   else
   {
-    int i, d = 1 << j, k, l;
+    int i, d, k, l;
     num sum_ = 0;
 
-    powerbuff[0][j] = tgt.e;
+    powerbuff[0][j] = Guru + tgt.e;
 
     for (i = 1, l = 0, d = 1 ; l < j ; l++, d <<= 1)
       for (k = 0 ; k < d ; k++)
         powerbuff[i++][j] = tgt.e + powerbuff[k][l];
 
-    for (i = 0 ; i < d; i++)
+    for (i = 0 ; i < d ; i++)
     {
       probabuff[i][j] = (1 - tgt.p) * probabuff[i][j-1];
       probabuff[i+d][j] = tgt.p * probabuff[i][j-1];
 
-      sum_ += probabuff[i][j-1] * powerbuff[i][j];
+      sum_ += probabuff[i][j-1] / powerbuff[i][j];
     }
 
-    sum[j] = tgt.p * sum_ + (1 - tgt.p) * sum[j-1];
+    sumbuff[j+1] = tgt.p * sum_ + (1 - tgt.p) * sumbuff[j];
   }
 }
 
-void reset_list(int p)
+/*
+void test_col(void)
+{
+  Target tgt_test;
+
+  tgt_test.p = 0.5;
+  tgt_test.e = 0;
+  tgt_test.w = 1;
+
+  int i;
+
+  for (i = 0 ; i < 2 ; i++)
+  {
+    update_col(tgt_test, i);
+  }
+
+  tgt_test.e = 1;
+  update_col(tgt_test, 2);
+  update_col(tgt_test, 3);
+
+  int j;
+
+  for (i = 0 ; i < 4 ; i++)
+  {
+    for (j = 0 ; j < 1 << (i + 1) ; j++)
+      printf("%5.3f ", probabuff[j][i]);
+    printf("\n");
+  }
+
+  printf("\n");
+
+  for (i = 0 ; i < 4 ; i++)
+  {
+    for (j = 0 ; j < 1 << i ; j++)
+      printf("%5.3f ", powerbuff[j][i]);
+    printf("\n");
+  }
+
+  printf("\n");
+
+  for (i = 0 ; i < 5 ; i++)
+    printf("%5.3f ", sumbuff[i]);
+  printf("\n");
+}
+*/
+
+void init_buff(void)
+{
+  int i;
+
+  for (i = 0 ; i < BUFF_SIZE ; i++)
+    permu[i] = i;
+
+  sumbuff[0] = 1 / Guru;
+}
+
+void reset_buff(int p)
 {
   int i;
   for (i = 0 ; i < p ; i++)
-    tlbuff[i].hd_id = NULL;
+    tlbuff[i].hd_id = -1;
+
+  tlbuff[p-1].hd_time = 0;
 }
 
+/*
 // Quick hack
 void search(Target** t, const int n, Target* tgt, int field, num min, num max, num tolerance)
 {
@@ -134,3 +229,5 @@ void search(Target** t, const int n, Target* tgt, int field, num min, num max, n
     }
   }
 }
+
+*/

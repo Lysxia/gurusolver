@@ -16,7 +16,7 @@ typedef struct
 
 num utility(const Target, const num);
 
-num guru_time(Target**, const int);
+num guru_time(Target*, const int);
 
 void rand_target(Target*, int);
 
