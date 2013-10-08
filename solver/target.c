@@ -36,7 +36,7 @@ void rand_target(Target* t, int n)
   {
     t[i].p = rand()%100/100.;
     t[i].e = rand()%1000/500.;
-    t[i].w = (rand()%100+1)/100.;
+    t[i].w = (rand()%1000+1)/100.;
   }
 }
 
